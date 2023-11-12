@@ -148,4 +148,4 @@ function createCarritoMesh(){
 }
 
 
-export default createCarritoMesh;
+export default { createCarritoMesh, createChair };
