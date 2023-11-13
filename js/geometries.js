@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import * as Geometries from './geometries.js';
 
 
 function createChair(){
@@ -148,4 +149,4 @@ function createCarritoMesh(){
 }
 
 
-export default { createCarritoMesh, createChair };
+export { createCarritoMesh, createChair };

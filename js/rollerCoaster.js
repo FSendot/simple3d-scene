@@ -1,10 +1,19 @@
 
 import * as THREE from 'three';
+import * as Geometries from './geometries.js';
 
 let trail, trailPath;
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+const carrito = Geometries.createCarritoMesh();
 
-function createTrail( whichTrail = true ){
+let up = new THREE.Vector3( 0, 1, 0 );
+let axis = new THREE.Vector3( );
+let pt, radians, tangent;
+let t = 0;
 
+
+const createTrail = ( whichTrail = true, columnsAmount = 5 ) => {
+    trail = new THREE.Group();
     let trailShape = new THREE.Shape();
     trailShape.moveTo(0,0);
     trailShape.bezierCurveTo(0,0, 0,-1, 0,-2);
@@ -26,43 +35,60 @@ function createTrail( whichTrail = true ){
         e.setX(e.x-5);
     });
     trailShape = new THREE.Shape(trailShapePoints.shape);
+    let trailCurve;
 
     if(whichTrail){
-        trail = new THREE.CatmullRomCurve3( [
+        trailCurve = new THREE.CatmullRomCurve3( [
             new THREE.Vector3( 0, 0, 0 ),
-            new THREE.Vector3( 8, 170, 25 ),
-            new THREE.Vector3( 55, 225, 75 ),
-            new THREE.Vector3( 55, 150, 180 ),
-            new THREE.Vector3( 55, 140, 180 ),
-            new THREE.Vector3( 60, 55, 140 ),
-            new THREE.Vector3( 60, 55, 50 ),
-            new THREE.Vector3( 60, 0, 0 ),
-            new THREE.Vector3( 50, -55, -50 ),
-            new THREE.Vector3( 50, -55, -140 ),
-            new THREE.Vector3( 40, -140, -180 ),
-            new THREE.Vector3( 30, -150, -180 ),
-            new THREE.Vector3( 20, -270, -75 ),
-            new THREE.Vector3( 20, -225, -50 ),
-            new THREE.Vector3( 2, -170, -25 ),
+            new THREE.Vector3( 170, 8, 25 ),
+            new THREE.Vector3( 225, 55, 75 ),
+            new THREE.Vector3( 150, 55, 180 ),
+            new THREE.Vector3( 140, 55, 180 ),
+            new THREE.Vector3( 55, 60, 140 ),
+            new THREE.Vector3( 55, 60, 50 ),
+            new THREE.Vector3( 0, 60, 0 ),
+            new THREE.Vector3( -55, 50, -50 ),
+            new THREE.Vector3( -55, 50, -140 ),
+            new THREE.Vector3( -140, 40, -180 ),
+            new THREE.Vector3( -150, 30, -180 ),
+            new THREE.Vector3( -270, 20, -75 ),
+            new THREE.Vector3( -225, 20, -50 ),
+            new THREE.Vector3( -170, 2, -25 ),
         ], true, 'chordal')
     } else {
-        trail =  new THREE.CatmullRomCurve3( [
+        trailCurve =  new THREE.CatmullRomCurve3( [
             new THREE.Vector3( 0, 0, 0 ),
-            new THREE.Vector3( 0, 60, 0 ),
-            new THREE.Vector3( 0, 120, 0 ),
-            new THREE.Vector3( 55, 210, 0 ),
-            new THREE.Vector3( 60, 240, 190 ),
-            new THREE.Vector3( 60, 225, 158 ),
-            new THREE.Vector3( 40, 155, 190 ),
-            new THREE.Vector3( 40, -100, 170 ),
-            new THREE.Vector3( 20, -50, 120 ),
-            new THREE.Vector3( 20, -30, 60 ),
+            new THREE.Vector3( 60, 0, 0 ),
+            new THREE.Vector3( 120, 0, 0 ),
+            new THREE.Vector3( 210, 55, 0 ),
+            new THREE.Vector3( 240, 60, 190 ),
+            new THREE.Vector3( 225, 60, 158 ),
+            new THREE.Vector3( 155, 40, 190 ),
+            new THREE.Vector3( -100, 40, 170 ),
+            new THREE.Vector3( -50, 20, 120 ),
+            new THREE.Vector3( -30, 20, 60 ),
             new THREE.Vector3( 0, 0, 30 ),
         ], true, 'chordal')
     }
     trailPath = new THREE.CurvePath();
-    trailPath.add(trail);
+    trailPath.add(trailCurve);
 
+    const steps = 1.0/columnsAmount;
+    let path = 0.0;
+    let column;
+    const pathPoint = new THREE.Vector3();
+    for(let i=0; i<columnsAmount ;i++){
+        trailPath.getPoint(path, pathPoint);
+        column = new THREE.Mesh(
+            new THREE.CylinderGeometry(3, 3, pathPoint.y + 30),
+            new THREE.MeshBasicMaterial({ color: 0x00ff00 } )
+        );
+        column.translateX(pathPoint.x);
+        column.translateY((pathPoint.y + 25)/2);
+        column.translateZ(pathPoint.z);
+        trail.add(column);
+        path = path + steps;
+    }
     const trailExtrudeSettings = {
         curveSegments: 50,
         steps: 100,
@@ -71,9 +97,42 @@ function createTrail( whichTrail = true ){
     };
     const trailGeometry = new THREE.ExtrudeGeometry(trailShape, trailExtrudeSettings);
 
-    trailGeometry.rotateZ(Math.PI/2);
-    trail = new THREE.Mesh(trailGeometry, new THREE.MeshBasicMaterial( { color: 0xe47200 } ));
+    // trailGeometry.rotateZ(Math.PI/2);
+    trailGeometry.translate(0,30,0);
+
+    trail.add( new THREE.Mesh(trailGeometry, new THREE.MeshBasicMaterial( { color: 0xe47200 } )));
+    
     return {trail: trail, trailPath: trailPath}
+};
+
+const animate = () => {
+    // Animate the roller coaster and the specialized camera
+    // set the marker position
+    pt = trailPath.getPoint( t );
+    if(!pt){
+        t = 0;
+        pt = trailPath.getPoint( t );
+    }
+
+    // set the marker position
+    carrito.position.set( pt.x, pt.y + 35, pt.z );
+    camera.position.set( pt.x, pt.y + 40, pt.z );
+
+    // get the tangent to the curve
+    tangent = trailPath.getTangent( t ).normalize();
+
+    // calculate the axis to rotate around
+    axis.crossVectors( up, tangent ).normalize();
+
+    // calcluate the angle between the up vector and the tangent
+    radians = Math.acos( up.dot( tangent ) ) + 1.5 * Math.PI;
+
+    // set the quaternion
+    carrito.quaternion.setFromAxisAngle( axis, radians );
+    camera.quaternion.setFromAxisAngle( axis, radians );
+
+    t = (t - 1 > 0.001) ? 0 : t += 0.0007;
+
 }
 
-export default createTrail;
+export { createTrail, animate, carrito, camera, trail, trailPath } ;
