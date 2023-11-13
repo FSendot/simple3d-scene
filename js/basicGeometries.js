@@ -1,12 +1,10 @@
 import * as THREE from 'three';
-import * as Geometries from './geometries.js';
-
 
 function createChair(){
     const firstBox = new THREE.BoxGeometry(4, 1, 4);
     firstBox.translate(0,0,2);
     const secondBox = new THREE.BoxGeometry(4, 4, 1);
-    secondBox.translate(0,1,0);
+    secondBox.translate(0,2,0);
 
     const chairMaterial = new THREE.MeshBasicMaterial({ color: 0xe5de00 });
     const group = new THREE.Group();

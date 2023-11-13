@@ -1,18 +1,21 @@
 
 import * as THREE from 'three';
-import * as Geometries from './geometries.js';
+import * as Geometries from './basicGeometries.js';
 
 let trail, trailPath;
-const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+const passengerCamera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
 const carrito = Geometries.createCarritoMesh();
 
 let up = new THREE.Vector3( 0, 1, 0 );
 let axis = new THREE.Vector3( );
-let pt, radians, tangent;
-let t = 0;
+let pt, radians, tangent, t;
 
 
-const createTrail = ( whichTrail = true, columnsAmount = 5 ) => {
+function createTrail( whichTrail = true, columnsAmount = 5 ){
+    if( !Number.isInteger(columnsAmount) || columnsAmount < 1 ){
+        columnsAmount = 5;
+    }
+
     trail = new THREE.Group();
     let trailShape = new THREE.Shape();
     trailShape.moveTo(0,0);
@@ -105,7 +108,7 @@ const createTrail = ( whichTrail = true, columnsAmount = 5 ) => {
     return {trail: trail, trailPath: trailPath}
 };
 
-const animate = () => {
+function animate(){
     // Animate the roller coaster and the specialized camera
     // set the marker position
     pt = trailPath.getPoint( t );
@@ -116,7 +119,7 @@ const animate = () => {
 
     // set the marker position
     carrito.position.set( pt.x, pt.y + 35, pt.z );
-    camera.position.set( pt.x, pt.y + 40, pt.z );
+    passengerCamera.position.set( pt.x, pt.y + 40, pt.z );
 
     // get the tangent to the curve
     tangent = trailPath.getTangent( t ).normalize();
@@ -129,10 +132,10 @@ const animate = () => {
 
     // set the quaternion
     carrito.quaternion.setFromAxisAngle( axis, radians );
-    camera.quaternion.setFromAxisAngle( axis, radians );
+    passengerCamera.quaternion.setFromAxisAngle( axis, radians );
 
     t = (t - 1 > 0.001) ? 0 : t += 0.0007;
 
 }
 
-export { createTrail, animate, carrito, camera, trail, trailPath } ;
+export { createTrail, animate, carrito, passengerCamera, trail } ;
