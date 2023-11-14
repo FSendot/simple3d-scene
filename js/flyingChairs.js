@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import * as Geometries from './basicGeometries.js';
 
-let circlePoints = [];
+let cableChairs = [];
 const chairsAndDiscGroup = new THREE.Group();
 const chairsGroup = new THREE.Group();
 const flyingChairs = new THREE.Group();
@@ -17,6 +17,7 @@ let z = 0.0;
 let zSign = 1;
 let t = 0;
 let step = 0.000001;
+let centripetalStep = Math.PI/6 * (step / 0.008) * -1;
 
 function createFlyingChairs( chairsAmount = 10, height = 70.0 ){
     if(!Number.isInteger(chairsAmount) || chairsAmount < 1){
@@ -102,14 +103,12 @@ function createFlyingChairs( chairsAmount = 10, height = 70.0 ){
         }));
     bottomPart4Mesh.translateY(33.5);
     
-    circlePoints = [];
     const step = (Math.PI * 2) / chairsAmount;
     let u = 0.0;
     let chair, cableGeometry, cableMesh;
-    let cableChairs = [];
+    cableChairs = [];
     for(let i=0; i<chairsAmount ;i++){
-        let pointVec = new THREE.Vector3(Math.cos(u) * 40, 0, Math.sin(u) * 40);
-        circlePoints.push(pointVec);
+        let pointVec = new THREE.Vector3(Math.sin(u) * 40, 0, Math.cos(u) * 40);
         chair = new Geometries.createChair();
         chair.translateY(-height - 20 - 3.5);
         cableGeometry = new THREE.CylinderGeometry(0.5, 0.5, height + 20);
@@ -125,9 +124,8 @@ function createFlyingChairs( chairsAmount = 10, height = 70.0 ){
         cableAndChair
             .add(chair)
             .add(cableMesh);
-        cableAndChair.translateY(20);
-        cableAndChair.translateX(pointVec.x);
-        cableAndChair.translateZ(pointVec.z);
+        cableAndChair.rotateY(u + Math.PI/2);
+        cableAndChair.position.set(pointVec.x, 20, pointVec.z);
         cableChairs.push({
             cableAndChair: cableAndChair,
             location: pointVec
@@ -178,10 +176,12 @@ function animate(){
 
 
     chairsGroup.rotateY(Math.PI * t);
+    cableChairs.forEach(cc => cc.cableAndChair.rotateZ(centripetalStep));
     t += step;
 
     if( t > 0.008 || t < step){
-        step = step * -1;
+        step *= -1;
+        centripetalStep *= -1;
         t = t < 0 ? 0 : t;
     }
 }
