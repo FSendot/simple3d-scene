@@ -24,7 +24,7 @@ genericCamera.position.set(-200, 100, -200);
 genericCamera.lookAt(scene.position);
 
 const flyingChairsCamera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 7000);
-flyingChairsCamera.position.set(-350, 100, -250);
+flyingChairsCamera.position.set(-50, 150, -150);
 flyingChairsCamera.lookAt(-400, 50, -500);
 cameras.push(flyingChairsCamera);
 
@@ -165,7 +165,7 @@ flyingChairsFolder
     .name('Altura')
     .onChange(value => {
         scene.remove(FlyingChairs.flyingChairs);
-        FlyingChairs.createFlyingChairs(value, flyingChairsProps.chairsAmount);
+        FlyingChairs.createFlyingChairs(flyingChairsProps.chairsAmount, value);
         scene.add(FlyingChairs.flyingChairs);
     });
 flyingChairsFolder
@@ -173,7 +173,7 @@ flyingChairsFolder
     .name('Sillas')
     .onChange(value => {
         scene.remove(FlyingChairs.flyingChairs);
-        FlyingChairs.createFlyingChairs(flyingChairsProps.height, value);
+        FlyingChairs.createFlyingChairs(value, flyingChairsProps.height);
         scene.add(FlyingChairs.flyingChairs);
     });
 

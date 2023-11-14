@@ -2,9 +2,7 @@ import * as THREE from 'three';
 import * as Geometries from './basicGeometries.js';
 
 let cableChairs = [];
-const chairsAndDiscGroup = new THREE.Group();
-const chairsGroup = new THREE.Group();
-const flyingChairs = new THREE.Group();
+let chairsAndDiscGroup, chairsGroup, flyingChairs;
 
 let discHeight;
 
@@ -27,9 +25,9 @@ function createFlyingChairs( chairsAmount = 10, height = 70.0 ){
     } else{
         discHeight = height;
     }
-    chairsAndDiscGroup.clear();
-    chairsGroup.clear();
-    flyingChairs.clear();
+    chairsAndDiscGroup = new THREE.Group();
+    chairsGroup = new THREE.Group();
+    flyingChairs = new THREE.Group();
     cableChairs = [];
     t = 0;
     z = 0;
@@ -138,11 +136,6 @@ function createFlyingChairs( chairsAmount = 10, height = 70.0 ){
         });
         u += step;
     }
-    
-    chairsAndDiscGroup.clear();
-    chairsGroup.clear();
-    // Group that will be added to the scene
-    flyingChairs.clear();
     
     cableChairs.forEach(cc => {
         chairsGroup.add(cc.cableAndChair);
