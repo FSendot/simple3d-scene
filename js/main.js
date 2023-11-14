@@ -1,22 +1,47 @@
 import * as THREE from 'three';
+import { GUI } from 'dat.gui';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { FlyControls } from 'three/examples/jsm/controls/FlyControls'
 import * as Geometries from './basicGeometries.js';
 import * as FlyingChairs from './flyingChairs.js';
 import * as RollerCoaster from './rollerCoaster.js';
 
 const scene = new THREE.Scene();
+const gui = new GUI();
+
+let phi = 0;
+let cameras = [];
+let index = 0;
 
 // Most camera definitions
-const rollerCoasterCamera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 5000);
-rollerCoasterCamera.position.set(200, 300, 400);
+const rollerCoasterCamera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 7000);
+rollerCoasterCamera.position.set(-400, 300, -500);
 rollerCoasterCamera.lookAt(scene.position);
+cameras.push(rollerCoasterCamera);
 
-const genericCamera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 5000);
-genericCamera.position.set(-400, 200, -500);
+const genericCamera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 7000);
+genericCamera.position.set(-200, 100, -200);
 genericCamera.lookAt(scene.position);
 
+const flyingChairsCamera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 7000);
+flyingChairsCamera.position.set(-350, 100, -250);
+flyingChairsCamera.lookAt(-400, 50, -500);
+cameras.push(flyingChairsCamera);
 
-let currentCamera = genericCamera;
+const cenytalCamera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 7000);
+cenytalCamera.position.set(-700, 500, -700);
+cenytalCamera.lookAt(scene.position);
+cameras.push(cenytalCamera)
+const cenytalCameraGroup = new THREE.Group().add(cenytalCamera);
+
+const controlledCamera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 7000);
+controlledCamera.position.set(100, 10, 100);
+controlledCamera.lookAt(scene.position);
+cameras.push(controlledCamera);
+
+cameras.push(RollerCoaster.passengerCamera);
+
+let currentCamera = controlledCamera;
 
 const renderer =  new THREE.WebGLRenderer();
 renderer.setClearColor(0x000000, 1.0);
@@ -25,6 +50,13 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 const controls = new OrbitControls(genericCamera, renderer.domElement);
 controls.screenSpacePanning=true;
 
+const keyboardControls = new FlyControls( controlledCamera, renderer.domElement );
+keyboardControls.movementSpeed = 100;
+keyboardControls.rollSpeed = Math.PI / 24;
+keyboardControls.autoForward = false;
+keyboardControls.dragToLook = true;
+
+// Sky and floor
 const floor = new THREE.Mesh( 
     new THREE.PlaneGeometry(10000, 10000), 
     new THREE.MeshPhysicalMaterial({ 
@@ -36,9 +68,44 @@ const floor = new THREE.Mesh(
     })
 );
 floor.rotateX(1.5 * Math.PI);
-scene.add(floor);
 
-// Defino elementos de la escena
+const sky = new THREE.Mesh(
+    new THREE.SphereGeometry(5000, 64, 32, 0, Math.PI * 2, 1.7, Math.PI),
+    new THREE.MeshPhysicalMaterial({
+        color: 0x000ef0,
+        ior: 1.5,
+        reflectivity: 0.5,
+        iridescenceIOR: 1.3,
+        specularIntensity: 1
+    })
+);
+sky.rotateZ(Math.PI);
+
+scene.add(floor);
+scene.add(sky);
+
+// Lamps
+const lamp1 = Geometries.createLantern();
+lamp1.position.set(100, 0, -100);
+scene.add(lamp1);
+
+const lamp2 = Geometries.createLantern();
+lamp2.position.set(-100, 0, 100);
+scene.add(lamp2);
+
+const lamp3 = Geometries.createLantern();
+lamp3.position.set(250, 0, -300);
+scene.add(lamp3);
+
+const lamp4 = Geometries.createLantern();
+lamp4.position.set(-80, 0, -400);
+scene.add(lamp4);
+
+const lamp5 = Geometries.createLantern();
+lamp5.position.set(-500, 0, 100);
+scene.add(lamp5);
+
+
 const ambienLight=new THREE.AmbientLight(0xFFFFFF);
 scene.add(ambienLight);
 
@@ -52,23 +119,66 @@ light2.position.set(-300.0,300.0,-150.0);
 light2.lookAt(scene.position)
 scene.add(light2);
 
-const gridHelper = new THREE.GridHelper( 100,10 );
-scene.add( gridHelper );
+//const gridHelper = new THREE.GridHelper( 100,10 );
+//scene.add( gridHelper );
 
-const axesHelper = new THREE.AxesHelper( 8 );
-scene.add( axesHelper );
+//const axesHelper = new THREE.AxesHelper( 8 );
+//scene.add( axesHelper );
 
 // Roller Coaster stuff
-
 RollerCoaster.createTrail(true, 15);
 scene.add(RollerCoaster.trail);
 scene.add(RollerCoaster.carrito);
 
+// Flying Chairs stuff
 FlyingChairs.createFlyingChairs(10, 60)
 scene.add(FlyingChairs.flyingChairs);
 
-document.body.appendChild(renderer.domElement);
+// Dat.GUI stuff
+let rollerCoasterProps = { 
+    isFirstTrail: true,
+    rollerCoasterColumns: 15
+};
+const rollerCoasterFolder = gui.addFolder('Montaña Rusa');
+rollerCoasterFolder
+    .add(rollerCoasterProps, 'isFirstTrail' )
+    .name('Perfil')
+    .onChange(value => {
+        RollerCoaster.createTrail(value, rollerCoasterProps.rollerCoasterColumns);
+        scene.add(RollerCoaster.trail)
+    });
+rollerCoasterFolder
+    .add(rollerCoasterProps, 'rollerCoasterColumns', 5, 30, 1)
+    .name('Cantidad de Columnas')
+    .onChange(value => {
+        RollerCoaster.createTrail(rollerCoasterProps.isFirstTrail, value);
+        scene.add(RollerCoaster.trail);
+    });
 
+let flyingChairsProps = {
+    height: 70.0,
+    chairsAmount: 15
+};
+const flyingChairsFolder = gui.addFolder('Sillas Voladoras');
+flyingChairsFolder
+    .add(flyingChairsProps, 'height', 50.0, 150.0, 0.1)
+    .name('Altura')
+    .onChange(value => {
+        scene.remove(FlyingChairs.flyingChairs);
+        FlyingChairs.createFlyingChairs(value, flyingChairsProps.chairsAmount);
+        scene.add(FlyingChairs.flyingChairs);
+    });
+flyingChairsFolder
+    .add(flyingChairsProps, 'chairsAmount', 5, 30, 1)
+    .name('Sillas')
+    .onChange(value => {
+        scene.remove(FlyingChairs.flyingChairs);
+        FlyingChairs.createFlyingChairs(flyingChairsProps.height, value);
+        scene.add(FlyingChairs.flyingChairs);
+    });
+
+document.body.appendChild(renderer.domElement);
+setupKeyControls();
 animate();
 
 function animate() {
@@ -77,6 +187,27 @@ function animate() {
     // Every Animation should be called here
     RollerCoaster.animate();
     FlyingChairs.animate();
-
+    cenytalCameraGroup.rotateY(0.0008)
+    cenytalCamera.lookAt(scene.position);
+    
+    phi += 0.0005;
+    if(phi > Math.PI * 2){
+        phi = 0;
+    }
+    keyboardControls.update(0.01)
 	renderer.render( scene, currentCamera );
+}
+
+
+function setupKeyControls() {
+    document.onkeydown = function (evento) {
+        if(index >= cameras.length){
+            index = 0;
+        }
+        switch (evento.key) {
+            case 'c':
+                currentCamera = cameras[index++];
+                break;
+        }
+    };
 }

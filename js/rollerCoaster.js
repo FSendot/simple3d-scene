@@ -2,10 +2,15 @@
 import * as THREE from 'three';
 import * as Geometries from './basicGeometries.js';
 
-let trail, trailPath;
+let trail = new THREE.Group();
+let trailPath;
 const passengerCamera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-const carrito = Geometries.createCarritoMesh();
+passengerCamera.rotateX(Math.PI/2);
+passengerCamera.rotateZ(-Math.PI/2);
 
+const carrito = Geometries.createCarritoMesh();
+carrito.translateY(35);
+passengerCamera.translateY(40);
 let up = new THREE.Vector3( 0, 1, 0 );
 let axis = new THREE.Vector3( );
 let pt, radians, tangent, t;
@@ -16,7 +21,7 @@ function createTrail( whichTrail = true, columnsAmount = 5 ){
         columnsAmount = 5;
     }
 
-    trail = new THREE.Group();
+    trail.clear();
     let trailShape = new THREE.Shape();
     trailShape.moveTo(0,0);
     trailShape.bezierCurveTo(0,0, 0,-1, 0,-2);
@@ -128,7 +133,7 @@ function animate(){
     axis.crossVectors( up, tangent ).normalize();
 
     // calcluate the angle between the up vector and the tangent
-    radians = Math.acos( up.dot( tangent ) ) + 1.5 * Math.PI;
+    radians = Math.acos( up.dot( tangent ) );
 
     // set the quaternion
     carrito.quaternion.setFromAxisAngle( axis, radians );

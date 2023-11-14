@@ -8,16 +8,15 @@ const flyingChairs = new THREE.Group();
 
 let discHeight;
 
-let up = new THREE.Vector3( 0, 1, 0 );
-let axis = new THREE.Vector3( );
-
 let x = 0.0;
 let xSign = 1;
+
 let z = 0.0;
 let zSign = 1;
+
 let t = 0;
 let step = 0.000001;
-let centripetalStep = Math.PI/6 * (step / 0.008) * -1;
+let centrifugalStep = Math.PI/6 * (step / 0.008) * -1;
 
 function createFlyingChairs( chairsAmount = 10, height = 70.0 ){
     if(!Number.isInteger(chairsAmount) || chairsAmount < 1){
@@ -28,6 +27,13 @@ function createFlyingChairs( chairsAmount = 10, height = 70.0 ){
     } else{
         discHeight = height;
     }
+    chairsAndDiscGroup.clear();
+    chairsGroup.clear();
+    flyingChairs.clear();
+    cableChairs = [];
+    t = 0;
+    z = 0;
+    x = 0;
     const mainCylinder = new THREE.CylinderGeometry(7, 7, height);
     const mainCylinderMesh = new THREE.Mesh(mainCylinder, new THREE.MeshBasicMaterial({ color: 0xff0000 }));
     mainCylinderMesh.translateY(height/2 + 35);
@@ -156,7 +162,7 @@ function createFlyingChairs( chairsAmount = 10, height = 70.0 ){
         .add(auxCylinder)
         .add(chairsAndDiscGroup);
 
-    flyingChairs.position.set(-200, 0, -300);
+    flyingChairs.position.set(-400, 0, -500);
 }
 
 function animate(){
@@ -176,12 +182,12 @@ function animate(){
 
 
     chairsGroup.rotateY(Math.PI * t);
-    cableChairs.forEach(cc => cc.cableAndChair.rotateZ(centripetalStep));
+    cableChairs.forEach(cc => cc.cableAndChair.rotateZ(centrifugalStep));
     t += step;
 
     if( t > 0.008 || t < step){
         step *= -1;
-        centripetalStep *= -1;
+        centrifugalStep *= -1;
         t = t < 0 ? 0 : t;
     }
 }
