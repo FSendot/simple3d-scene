@@ -6,7 +6,7 @@ function createChair(){
     const secondBox = new THREE.BoxGeometry(4, 4, 1);
     secondBox.translate(0,2,0);
 
-    const chairMaterial = new THREE.MeshBasicMaterial({ color: 0xe5de00 });
+    const chairMaterial = new THREE.MeshPhongMaterial({ color: 0xe5de00 });
     const group = new THREE.Group();
     group.add(new THREE.Mesh(firstBox, chairMaterial));
     group.add(new THREE.Mesh(secondBox, chairMaterial));
@@ -39,7 +39,7 @@ function createCarritoMesh(){
     };
 
     const extrudeGeometry = new THREE.ExtrudeGeometry(extrudeShape, extrudeSettings1);
-    const extrudeMaterial = new THREE.MeshBasicMaterial( { color: 0xe47200 } );
+    const extrudeMaterial = new THREE.MeshPhongMaterial( { color: 0xe47200 } );
     const carritoMesh = new THREE.Mesh( extrudeGeometry, extrudeMaterial );
 
 
@@ -151,23 +151,11 @@ function createCarritoMesh(){
 function createLantern(){
     const column = new THREE.Mesh(
         new THREE.CylinderGeometry(2, 2, 50),
-        new THREE.MeshPhysicalMaterial({
-        color: 0xf00f00,
-        ior: 1.5,
-        reflectivity: 0.5,
-        iridescenceIOR: 1.3,
-        specularIntensity: 1 
-        })
+        new THREE.MeshPhongMaterial({ color: 0xf00f00 })
     );
     const lantern = new THREE.Mesh(
         new THREE.SphereGeometry(7),
-        new THREE.MeshPhysicalMaterial({
-        color: 0xffffff,
-        ior: 1.5,
-        reflectivity: 0.5,
-        iridescenceIOR: 1.3,
-        specularIntensity: 1 
-        })
+        new THREE.MeshPhongMaterial({ color: 0xffffff })
     );
     column.translateY(25);
     lantern.translateY(45);

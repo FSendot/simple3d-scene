@@ -89,7 +89,7 @@ function createTrail( whichTrail = true, columnsAmount = 5 ){
         trailPath.getPoint(path, pathPoint);
         column = new THREE.Mesh(
             new THREE.CylinderGeometry(3, 3, pathPoint.y + 30),
-            new THREE.MeshBasicMaterial({ color: 0x00ff00 } )
+            new THREE.MeshPhongMaterial({ color: 0x00ff00 } )
         );
         column.translateX(pathPoint.x);
         column.translateY((pathPoint.y + 25)/2);
@@ -108,7 +108,7 @@ function createTrail( whichTrail = true, columnsAmount = 5 ){
     // trailGeometry.rotateZ(Math.PI/2);
     trailGeometry.translate(0,30,0);
 
-    trail.add( new THREE.Mesh(trailGeometry, new THREE.MeshBasicMaterial( { color: 0xe47200 } )));
+    trail.add( new THREE.Mesh(trailGeometry, new THREE.MeshPhongMaterial( { color: 0xe47200 } )));
     
     return {trail: trail, trailPath: trailPath}
 };

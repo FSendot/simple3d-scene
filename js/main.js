@@ -59,32 +59,20 @@ keyboardControls.dragToLook = true;
 // Sky and floor
 const floor = new THREE.Mesh( 
     new THREE.PlaneGeometry(10000, 10000), 
-    new THREE.MeshPhysicalMaterial({ 
-        color: 0xffff00,
-        ior: 1.5,
-        reflectivity: 0.5,
-        iridescenceIOR: 1.3,
-        specularIntensity: 1
-    })
+    new THREE.MeshPhongMaterial({ color: 0x26a269 })
 );
 floor.rotateX(1.5 * Math.PI);
 
 const sky = new THREE.Mesh(
     new THREE.SphereGeometry(5000, 64, 32, 0, Math.PI * 2, 1.7, Math.PI),
-    new THREE.MeshPhysicalMaterial({
-        color: 0x000ef0,
-        ior: 1.5,
-        reflectivity: 0.5,
-        iridescenceIOR: 1.3,
-        specularIntensity: 1
-    })
+    new THREE.MeshPhongMaterial({ color: 0x000ef0 })
 );
 sky.rotateZ(Math.PI);
 
 scene.add(floor);
 scene.add(sky);
 
-// Lamps
+// Lanterns
 const lamp1 = Geometries.createLantern();
 lamp1.position.set(100, 0, -100);
 scene.add(lamp1);
@@ -105,10 +93,15 @@ const lamp5 = Geometries.createLantern();
 lamp5.position.set(-500, 0, 100);
 scene.add(lamp5);
 
-
+// Light
 const ambienLight=new THREE.AmbientLight(0xFFFFFF);
 scene.add(ambienLight);
 
+const directionalLight = new THREE.DirectionalLight(0xffffff, 5);
+directionalLight.position.set(300, 300, 300);
+scene.add(directionalLight);
+    
+/*
 const light1 = new THREE.PointLight(0xFFFFFF, 1);
 light1.position.set(300.0,300.0,150.0);
 light1.lookAt(scene.position)
@@ -118,7 +111,7 @@ const light2 = new THREE.PointLight(0xFFFFFF, 1);
 light2.position.set(-300.0,300.0,-150.0);
 light2.lookAt(scene.position)
 scene.add(light2);
-
+*/
 //const gridHelper = new THREE.GridHelper( 100,10 );
 //scene.add( gridHelper );
 
