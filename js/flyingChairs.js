@@ -32,27 +32,37 @@ function createFlyingChairs( chairsAmount = 10, height = 70.0 ){
     t = 0;
     z = 0;
     x = 0;
-    const mainCylinder = new THREE.CylinderGeometry(7, 7, height);
-    const mainCylinderMesh = new THREE.Mesh(mainCylinder, new THREE.MeshPhongMaterial({ color: 0xff0000 }));
-    mainCylinderMesh.translateY(height/2 + 35);
+    const mainCylinderMaterial = new THREE.MeshPhongMaterial({ color: 0xff0000 });
+    const mainCylinder = new THREE.Mesh(new THREE.CylinderGeometry(7, 7, height), mainCylinderMaterial);
+    mainCylinder.translateY(height/2 + 35);
+
+    const discSideMaterial = new THREE.MeshPhongMaterial({ color: 0x049ef4 });
+    const discSurfaceMaterial = new THREE.MeshPhongMaterial({ color: 0x049ef4 });
 
     const discPart1 = new THREE.Mesh(
         new THREE.CylinderGeometry(50, 7, 15), 
-        new THREE.MeshPhongMaterial({ color: 0x049ef4 })
+        discSurfaceMaterial
     );
-
     discPart1.translateY(7.5);
+
+    
     const discPart2 = new THREE.Mesh(
         new THREE.CylinderGeometry(50, 50, 7), 
-        new THREE.MeshPhongMaterial({ color: 0x049ef4 })
+        discSideMaterial
     );
-
     discPart2.translateY(15 + 3.5);
+
+    const discPart3 = new THREE.Mesh(
+        new THREE.ConeGeometry(50.0, 4.0),
+        discSurfaceMaterial
+    );
+    discPart3.translateY(15 + 7 + 2);
     
     const disc = new THREE.Group();
     disc
         .add(discPart1)
-        .add(discPart2);
+        .add(discPart2)
+        .add(discPart3);
 
     const auxCylinder = new THREE.Mesh(
         new THREE.CylinderGeometry(12, 8, 7), 
@@ -116,7 +126,7 @@ function createFlyingChairs( chairsAmount = 10, height = 70.0 ){
     chairsAndDiscGroup.translateY(height + 35);
 
     flyingChairs
-        .add(mainCylinderMesh)
+        .add(mainCylinder)
         .add(bottomPart1Mesh)
         .add(bottomPart2Mesh)
         .add(bottomPart3Mesh)
