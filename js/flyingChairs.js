@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import * as Geometries from './basicGeometries.js';
 
 let cableChairs = [];
-let chairsAndDiscGroup, chairsGroup, flyingChairs;
+let chairsAndDiscGroup, chairsGroup, flyingChairs, mainRotatingGroup;
 
 let discHeight;
 
@@ -16,6 +16,27 @@ let t = 0;
 let step = 0.000001;
 let centrifugalStep = Math.PI/6 * (step / 0.008) * -1;
 
+const loader = new THREE.TextureLoader();
+const mainCylinderTexture = loader.load("./../maps/patron1.png");
+mainCylinderTexture.wrapS = mainCylinderTexture.wrapT = THREE.RepeatWrapping;
+mainCylinderTexture.anisotropy = 16;
+mainCylinderTexture.colorSpace = THREE.SRGBColorSpace;
+mainCylinderTexture.repeat.set(0.98, mainCylinderTexture.repeat.y);
+
+const discTexture = loader.load("./../maps/patron3.png");
+const sideDiscTexture = discTexture.clone();
+
+discTexture.wrapS = THREE.RepeatWrapping;
+discTexture.mapping = THREE.EquirectangularRefractionMapping;
+discTexture.repeat.set(2, 6/8);
+discTexture.anisotropy = 16;
+
+sideDiscTexture.wrapT = THREE.MirroredRepeatWrapping;
+sideDiscTexture.wrapS = THREE.RepeatWrapping;
+sideDiscTexture.anisotropy = 32;
+sideDiscTexture.center.set(1, 1.07);
+sideDiscTexture.repeat.set(2, 1.0/7.9);
+
 function createFlyingChairs( chairsAmount = 10, height = 70.0 ){
     if(!Number.isInteger(chairsAmount) || chairsAmount < 1){
         chairsAmount = 5;
@@ -28,16 +49,20 @@ function createFlyingChairs( chairsAmount = 10, height = 70.0 ){
     chairsAndDiscGroup = new THREE.Group();
     chairsGroup = new THREE.Group();
     flyingChairs = new THREE.Group();
+    mainRotatingGroup = new THREE.Group();
+
     cableChairs = [];
     t = 0;
     z = 0;
     x = 0;
-    const mainCylinderMaterial = new THREE.MeshPhongMaterial({ color: 0xff0000 });
+
+    mainCylinderTexture.repeat.set(mainCylinderTexture.repeat.x, height / 90.0);
+    const mainCylinderMaterial = new THREE.MeshPhongMaterial({ map: mainCylinderTexture });
     const mainCylinder = new THREE.Mesh(new THREE.CylinderGeometry(7, 7, height), mainCylinderMaterial);
     mainCylinder.translateY(height/2 + 35);
 
-    const discSideMaterial = new THREE.MeshPhongMaterial({ color: 0x049ef4 });
-    const discSurfaceMaterial = new THREE.MeshPhongMaterial({ color: 0x049ef4 });
+    const discSideMaterial = new THREE.MeshPhongMaterial({ map: sideDiscTexture });
+    const discSurfaceMaterial = new THREE.MeshPhongMaterial({ map: discTexture });
 
     const discPart1 = new THREE.Mesh(
         new THREE.CylinderGeometry(50, 7, 15), 
@@ -53,7 +78,7 @@ function createFlyingChairs( chairsAmount = 10, height = 70.0 ){
     discPart2.translateY(15 + 3.5);
 
     const discPart3 = new THREE.Mesh(
-        new THREE.ConeGeometry(50.0, 4.0),
+        new THREE.ConeGeometry(50, 4),
         discSurfaceMaterial
     );
     discPart3.translateY(15 + 7 + 2);
@@ -66,10 +91,9 @@ function createFlyingChairs( chairsAmount = 10, height = 70.0 ){
 
     const auxCylinder = new THREE.Mesh(
         new THREE.CylinderGeometry(12, 8, 7), 
-        new THREE.MeshPhysicalMaterial({ color: 0x049ef4 })
+        new THREE.MeshPhysicalMaterial({ map: discTexture })
     );
 
-    auxCylinder.translateY(height + 35);
     
     const bottomPart1Mesh = new THREE.Mesh(
         new THREE.CylinderGeometry(12, 12, 20), 
@@ -122,17 +146,20 @@ function createFlyingChairs( chairsAmount = 10, height = 70.0 ){
 
     chairsAndDiscGroup
         .add(disc)
+        .add(auxCylinder)
         .add(chairsGroup);
     chairsAndDiscGroup.translateY(height + 35);
 
+    mainRotatingGroup
+        .add(chairsAndDiscGroup)
+        .add(mainCylinder);
+
     flyingChairs
-        .add(mainCylinder)
         .add(bottomPart1Mesh)
         .add(bottomPart2Mesh)
         .add(bottomPart3Mesh)
         .add(bottomPart4Mesh)
-        .add(auxCylinder)
-        .add(chairsAndDiscGroup);
+        .add(mainRotatingGroup);
 
     flyingChairs.position.set(-400, 0, -500);
 }
@@ -153,7 +180,7 @@ function animate(){
     chairsAndDiscGroup.rotateZ(randZ);
 
 
-    chairsGroup.rotateY(Math.PI * t);
+    mainRotatingGroup.rotateY(Math.PI * t);
     cableChairs.forEach(cc => cc.rotateZ(centrifugalStep));
     t += step;
 
