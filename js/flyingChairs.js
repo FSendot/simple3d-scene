@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import * as Geometries from './basicGeometries.js';
+import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 
 let cableChairs = [];
 let chairsAndDiscGroup, chairsGroup, flyingChairs, mainRotatingGroup;
@@ -28,7 +29,7 @@ const sideDiscTexture = discTexture.clone();
 
 discTexture.wrapS = THREE.RepeatWrapping;
 discTexture.mapping = THREE.EquirectangularRefractionMapping;
-discTexture.repeat.set(2, 6/8);
+discTexture.repeat.set(2, 6.4/8);
 discTexture.anisotropy = 16;
 
 sideDiscTexture.wrapT = THREE.MirroredRepeatWrapping;
@@ -57,12 +58,31 @@ function createFlyingChairs( chairsAmount = 10, height = 70.0 ){
     x = 0;
 
     mainCylinderTexture.repeat.set(mainCylinderTexture.repeat.x, height / 90.0);
-    const mainCylinderMaterial = new THREE.MeshPhongMaterial({ map: mainCylinderTexture });
+    const mainCylinderMaterial = new THREE.MeshPhongMaterial({ 
+        map: mainCylinderTexture,
+        reflectivity: 0.5,
+        specular: 0xffffff, 
+        shininess: 100,
+    });
     const mainCylinder = new THREE.Mesh(new THREE.CylinderGeometry(7, 7, height), mainCylinderMaterial);
     mainCylinder.translateY(height/2 + 35);
 
-    const discSideMaterial = new THREE.MeshPhongMaterial({ map: sideDiscTexture });
-    const discSurfaceMaterial = new THREE.MeshPhongMaterial({ map: discTexture });
+    const discSideMaterial = new THREE.MeshPhongMaterial({ 
+        color: 0xc9c9c9, 
+        map: sideDiscTexture, 
+        combine: THREE.MixOperation, 
+        reflectivity: 0.5,
+        specular: 0xc9c9c9, 
+        shininess: 100,
+    });
+    const discSurfaceMaterial = new THREE.MeshPhongMaterial({ 
+        color: 0xc9c9c9, 
+        map: discTexture, 
+        combine: THREE.MixOperation, 
+        reflectivity: 0.5, 
+        specular: 0xc9c9c9, 
+        shininess: 100,
+    });
 
     const discPart1 = new THREE.Mesh(
         new THREE.CylinderGeometry(50, 7, 15), 
@@ -77,8 +97,24 @@ function createFlyingChairs( chairsAmount = 10, height = 70.0 ){
     );
     discPart2.translateY(15 + 3.5);
 
+    const discPart3Geometry = new THREE.ConeGeometry(50, 4);
+    
+    /*
+    const uvAttribute = discPart3Geometry.getAttribute('uv');
+    // Iterate through each vertex and modify the UV coordinates
+    for (let i = 0; i < uvAttribute.count / 2; i++) {
+        // Get the original UV coordinates
+        let originalU1 = uvAttribute.getX(i);
+        let originalU2 = uvAttribute.getX(uvAttribute.count - i);
+
+        // Modify the U coordinate based on the X position of the vertex (adjust scaling as needed)
+        uvAttribute.setX(i, originalU1 * (1 - discPart3Geometry.attributes.position.getX(i) / 4));
+        uvAttribute.setX(uvAttribute.count  - i, originalU2 * (1 + discPart3Geometry.attributes.position.getX(i) / 4));
+    }
+    */
+
     const discPart3 = new THREE.Mesh(
-        new THREE.ConeGeometry(50, 4),
+        discPart3Geometry,
         discSurfaceMaterial
     );
     discPart3.translateY(15 + 7 + 2);
@@ -94,28 +130,30 @@ function createFlyingChairs( chairsAmount = 10, height = 70.0 ){
         new THREE.MeshPhysicalMaterial({ map: discTexture })
     );
 
-    
+    const bottomPartMaterial = new THREE.MeshPhongMaterial({
+        color: 0x2b00ff
+    });
     const bottomPart1Mesh = new THREE.Mesh(
         new THREE.CylinderGeometry(12, 12, 20), 
-        new THREE.MeshPhysicalMaterial({ color: 0x049ef4 })
+        bottomPartMaterial
     );
     bottomPart1Mesh.translateY(10);
     
     const bottomPart2Mesh = new THREE.Mesh(
         new THREE.CylinderGeometry(9, 12, 7), 
-        new THREE.MeshPhongMaterial({ color: 0x049ef4 })
+        bottomPartMaterial
     );
     bottomPart2Mesh.translateY(23.5);
     
     const bottomPart3Mesh = new THREE.Mesh(
         new THREE.CylinderGeometry(9, 9, 5), 
-        new THREE.MeshPhongMaterial({ color: 0x049ef4 })
+        bottomPartMaterial
     );
     bottomPart3Mesh.translateY(29.5);
     
     const bottomPart4Mesh = new THREE.Mesh(
         new THREE.CylinderGeometry(8, 9, 3), 
-        new THREE.MeshPhongMaterial({ color: 0x049ef4 })
+        bottomPartMaterial
     );
     bottomPart4Mesh.translateY(33.5);
     
@@ -125,7 +163,10 @@ function createFlyingChairs( chairsAmount = 10, height = 70.0 ){
     cableChairs = [];
     for(let i=0; i<chairsAmount ;i++){
         let pointVec = new THREE.Vector3(Math.sin(u) * 40, 0, Math.cos(u) * 40);
-        chair = new Geometries.createChair();
+        const chairMaterialProperties = {
+            color: 0xdd33ff
+        };
+        chair = new Geometries.createPurpleChair();
         chair.translateY(-height - 20 - 3.5);
         cableMesh = new THREE.Mesh(
             new THREE.CylinderGeometry(0.5, 0.5, height + 20), 

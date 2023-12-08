@@ -8,6 +8,7 @@ import * as RollerCoaster from './rollerCoaster.js';
 
 const scene = new THREE.Scene();
 const gui = new GUI();
+const loader = new THREE.TextureLoader();
 
 let phi = 0;
 let cameras = [];
@@ -57,15 +58,54 @@ keyboardControls.autoForward = false;
 keyboardControls.dragToLook = true;
 
 // Sky and floor
+const pasto = loader.load("./../maps/pasto.jpg", (pasto) => {
+    pasto.wrapS = pasto.wrapT = THREE.RepeatWrapping;
+    pasto.anisotropy = 16;
+    pasto.colorSpace = THREE.SRGBColorSpace;
+    pasto.repeat.set(100, 100);
+});
+const tierra = loader.load("./../maps/tierra.jpg", (tierra) => {
+    tierra.wrapS = tierra.wrapT = THREE.RepeatWrapping;
+    tierra.anisotropy = 16;
+    tierra.colorSpace = THREE.SRGBColorSpace;
+    tierra.repeat.set(100, 100);
+    renderer.copyTextureToTexture(new THREE.Vector2(0.5, 0), tierra, pasto, 1);
+});
+
+const tierraSeca = loader.load("./../maps/tierraseca.jpg", (tierraSeca) => {
+    tierraSeca.wrapS = tierraSeca.wrapT = THREE.RepeatWrapping;
+    tierraSeca.anisotropy = 16;
+    tierraSeca.colorSpace = THREE.SRGBColorSpace;
+    tierraSeca.repeat.set(100, 100);
+    renderer.copyTextureToTexture(new THREE.Vector2(0, 0.5), tierraSeca, pasto, 1);
+});
+
+const floorMaterial = new THREE.MeshPhongMaterial({ 
+    map: pasto,
+    reflectivity: 0,
+    specular: 0, 
+    shininess: 100000,
+});
 const floor = new THREE.Mesh( 
     new THREE.PlaneGeometry(10000, 10000), 
-    new THREE.MeshPhongMaterial({ color: 0x26a269 })
+    floorMaterial
 );
 floor.rotateX(1.5 * Math.PI);
 
+const skyTexture = loader.load("./../maps/sunset.jpg", (skyTexture) => {
+    skyTexture.wrapS = skyTexture.wrapT = THREE.RepeatWrapping;
+    skyTexture.anisotropy = 256;
+    skyTexture.repeat.set(1, 1);
+});
+const skyMaterial = new THREE.MeshPhongMaterial({ 
+    map: skyTexture,
+    reflectivity: 0,
+    specular: 0, 
+    shininess: 100000,
+});
 const sky = new THREE.Mesh(
-    new THREE.SphereGeometry(5000, 64, 32, 0, Math.PI * 2, 1.7, Math.PI),
-    new THREE.MeshPhongMaterial({ color: 0x000ef0 })
+    new THREE.SphereGeometry(5000, 64, 32, 0, Math.PI * 2, 1.7, Math.PI * 1.55),
+    skyMaterial
 );
 sky.rotateZ(Math.PI);
 

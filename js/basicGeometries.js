@@ -13,6 +13,18 @@ function createChair(){
     return group;
 }
 
+function createPurpleChair(){
+    const firstBox = new THREE.BoxGeometry(4, 1, 4);
+    firstBox.translate(0,0,2);
+    const secondBox = new THREE.BoxGeometry(4, 4, 1);
+    secondBox.translate(0,2,0);
+
+    const chairMaterial = new THREE.MeshPhongMaterial({ color: 0xdd33ff });
+    const group = new THREE.Group();
+    group.add(new THREE.Mesh(firstBox, chairMaterial));
+    group.add(new THREE.Mesh(secondBox, chairMaterial));
+    return group;
+}
 
 function createCarritoMesh(){
     const extrudeShape = new THREE.Shape();
@@ -162,4 +174,4 @@ function createLantern(){
     return new THREE.Group().add(column).add(lantern);
 }
 
-export { createCarritoMesh, createChair, createLantern };
+export { createCarritoMesh, createChair, createPurpleChair, createLantern };
