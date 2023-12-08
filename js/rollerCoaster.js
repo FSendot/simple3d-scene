@@ -15,6 +15,8 @@ let up = new THREE.Vector3( 0, 1, 0 );
 let axis = new THREE.Vector3( );
 let pt, radians, tangent, t;
 
+const loader = new THREE.TextureLoader();
+const trailReflectionTexture = loader.load("./../maps/refmapGreyRoom3.jpg");
 
 function createTrail( whichTrail = true, columnsAmount = 5 ){
     if( !Number.isInteger(columnsAmount) || columnsAmount < 1 ){
@@ -89,7 +91,13 @@ function createTrail( whichTrail = true, columnsAmount = 5 ){
         trailPath.getPoint(path, pathPoint);
         column = new THREE.Mesh(
             new THREE.CylinderGeometry(3, 3, pathPoint.y + 30),
-            new THREE.MeshPhongMaterial({ color: 0x00ff00 } )
+            new THREE.MeshPhongMaterial({ 
+                color: 0x26a269, 
+                envMap: trailReflectionTexture,
+                reflectivity: 0.5,
+                specular: 0xffffff, 
+                shininess: 100,
+            } )
         );
         column.translateX(pathPoint.x);
         column.translateY((pathPoint.y + 25)/2);
@@ -99,7 +107,7 @@ function createTrail( whichTrail = true, columnsAmount = 5 ){
     }
     const trailExtrudeSettings = {
         curveSegments: 50,
-        steps: 100,
+        steps: 1000,
         bevelEnabled: false,
         extrudePath: trailPath,
     };
@@ -108,7 +116,15 @@ function createTrail( whichTrail = true, columnsAmount = 5 ){
     // trailGeometry.rotateZ(Math.PI/2);
     trailGeometry.translate(0,30,0);
 
-    trail.add( new THREE.Mesh(trailGeometry, new THREE.MeshPhongMaterial( { color: 0xe47200 } )));
+    const trailMaterial = new THREE.MeshPhongMaterial({ 
+        color: 0xe47200,
+        envMap: trailReflectionTexture,
+        reflectivity: 0.5,
+        specular: 0xffffff, 
+        shininess: 100,
+    });
+
+    trail.add( new THREE.Mesh(trailGeometry, trailMaterial));
     
     return {trail: trail, trailPath: trailPath}
 };
