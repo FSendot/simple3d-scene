@@ -163,15 +163,31 @@ function createCarritoMesh(){
 function createLantern(){
     const column = new THREE.Mesh(
         new THREE.CylinderGeometry(2, 2, 50),
-        new THREE.MeshPhongMaterial({ color: 0xf00f00 })
+        new THREE.MeshPhongMaterial({ 
+            color: 0xf00f00,
+            reflectivity: 0.5,
+            specular: 0xffffff, 
+            shininess: 100,
+        })
     );
     const lantern = new THREE.Mesh(
         new THREE.SphereGeometry(7),
-        new THREE.MeshPhongMaterial({ color: 0xffffff })
+        new THREE.MeshPhongMaterial({ 
+            color: 0xffffff,
+            emissive: 0xffffff,
+            emissiveIntensity: 3000,
+            reflectivity: 0.5,
+        })
     );
+    const lanternLight = new THREE.PointLight( 0xffffff );
+    lanternLight.power = 1000000;
     column.translateY(25);
     lantern.translateY(45);
-    return new THREE.Group().add(column).add(lantern);
+    lanternLight.translateY(60);
+    return new THREE.Group()
+        .add(column)
+        .add(lantern)
+        .add(lanternLight);
 }
 
 export { createCarritoMesh, createChair, createPurpleChair, createLantern };

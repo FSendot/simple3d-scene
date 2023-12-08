@@ -84,7 +84,7 @@ const floorMaterial = new THREE.MeshPhongMaterial({
     map: pasto,
     reflectivity: 0,
     specular: 0, 
-    shininess: 100000,
+    shininess: 30,
 });
 const floor = new THREE.Mesh( 
     new THREE.PlaneGeometry(10000, 10000), 
@@ -137,9 +137,6 @@ scene.add(lamp5);
 const ambienLight=new THREE.AmbientLight(0xFFFFFF);
 scene.add(ambienLight);
 
-const directionalLight = new THREE.DirectionalLight(0xffffff, 5);
-directionalLight.position.set(300, 300, 300);
-scene.add(directionalLight);
     
 /*
 const light1 = new THREE.PointLight(0xFFFFFF, 1);
