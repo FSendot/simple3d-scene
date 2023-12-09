@@ -82,6 +82,7 @@ const tierraSeca = loader.load("./../maps/tierraseca.jpg", (tierraSeca) => {
 
 const floorMaterial = new THREE.MeshPhongMaterial({ 
     map: pasto,
+    emissive: 0x111111,
     reflectivity: 0,
     specular: 0, 
     shininess: 30,
@@ -99,6 +100,7 @@ const skyTexture = loader.load("./../maps/sunset.jpg", (skyTexture) => {
 });
 const skyMaterial = new THREE.MeshPhongMaterial({ 
     map: skyTexture,
+    emissive: 0x222222,
     reflectivity: 0,
     specular: 0, 
     shininess: 100000,

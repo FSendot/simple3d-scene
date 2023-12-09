@@ -94,7 +94,7 @@ function createTrail( whichTrail = true, columnsAmount = 5 ){
             new THREE.MeshPhongMaterial({ 
                 color: 0x26a269, 
                 envMap: trailReflectionTexture,
-                reflectivity: 0.5,
+                reflectivity: 0.9,
                 specular: 0xffffff, 
                 shininess: 100,
             } )
@@ -119,9 +119,9 @@ function createTrail( whichTrail = true, columnsAmount = 5 ){
     const trailMaterial = new THREE.MeshPhongMaterial({ 
         color: 0xe47200,
         envMap: trailReflectionTexture,
-        reflectivity: 0.5,
+        reflectivity: 0.8,
         specular: 0xffffff, 
-        shininess: 100,
+        shininess: 200,
     });
 
     trail.add( new THREE.Mesh(trailGeometry, trailMaterial));
