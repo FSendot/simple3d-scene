@@ -127,11 +127,19 @@ function createFlyingChairs( chairsAmount = 10, height = 70.0 ){
 
     const auxCylinder = new THREE.Mesh(
         new THREE.CylinderGeometry(12, 8, 7), 
-        new THREE.MeshPhysicalMaterial({ map: discTexture })
+        new THREE.MeshPhongMaterial({ 
+            map: discTexture,
+            reflectivity: 0.9,
+            specular: 0x111111, 
+            shininess: 300,
+        })
     );
 
     const bottomPartMaterial = new THREE.MeshPhongMaterial({
-        color: 0x2b00ff
+        color: 0x2b00ff,
+        reflectivity: 0.9,
+        specular: 0x111111, 
+        shininess: 300,
     });
     const bottomPart1Mesh = new THREE.Mesh(
         new THREE.CylinderGeometry(12, 12, 20), 
@@ -163,14 +171,17 @@ function createFlyingChairs( chairsAmount = 10, height = 70.0 ){
     cableChairs = [];
     for(let i=0; i<chairsAmount ;i++){
         let pointVec = new THREE.Vector3(Math.sin(u) * 40, 0, Math.cos(u) * 40);
-        const chairMaterialProperties = {
-            color: 0xdd33ff
-        };
+        const cableMaterial = new THREE.MeshPhongMaterial({
+            color: 0x0,
+            reflectivity: 0.9,
+            specular: 0x111111, 
+            shininess: 300,
+        });
         chair = new Geometries.createPurpleChair();
         chair.translateY(-height - 20 - 3.5);
         cableMesh = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.5, 0.5, height + 20), 
-            new THREE.MeshPhongMaterial({ color: 0x0 })
+            new THREE.CylinderGeometry(0.45, 0.45, height + 20), 
+            cableMaterial
         );
         cableMesh.translateY(-(height + 20.0)/2);
         let cableAndChair = new THREE.Group();

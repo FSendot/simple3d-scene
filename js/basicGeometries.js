@@ -1,8 +1,11 @@
 import * as THREE from 'three';
 
+const loader = new THREE.TextureLoader();
+const carritoReflectionTexture = loader.load("./../maps/refmapGreyRoom3.jpg");
+
 function createChair(){
     const firstBox = new THREE.BoxGeometry(4, 1, 4);
-    firstBox.translate(0,0,2);
+    firstBox.translate(0,0,1.5);
     const secondBox = new THREE.BoxGeometry(4, 4, 1);
     secondBox.translate(0,2,0);
 
@@ -20,11 +23,16 @@ function createChair(){
 
 function createPurpleChair(){
     const firstBox = new THREE.BoxGeometry(4, 1, 4);
-    firstBox.translate(0,0,2);
+    firstBox.translate(0,0,1.5);
     const secondBox = new THREE.BoxGeometry(4, 4, 1);
     secondBox.translate(0,2,0);
 
-    const chairMaterial = new THREE.MeshPhongMaterial({ color: 0xdd33ff });
+    const chairMaterial = new THREE.MeshPhongMaterial({ 
+        color: 0xdd33ff,
+        reflectivity: 0.9,
+        specular: 0x111111, 
+        shininess: 300,
+    });
     const group = new THREE.Group();
     group.add(new THREE.Mesh(firstBox, chairMaterial));
     group.add(new THREE.Mesh(secondBox, chairMaterial));
@@ -58,9 +66,10 @@ function createCarritoMesh(){
     const extrudeGeometry = new THREE.ExtrudeGeometry(extrudeShape, extrudeSettings1);
     const extrudeMaterial = new THREE.MeshPhongMaterial( { 
         color: 0xe47200,
+        envMap: carritoReflectionTexture,
         reflectivity: 0.9,
-        specular: 0x444444, 
-        shininess: 100,
+        specular: 0xbbbbbb, 
+        shininess: 300,
     } );
     const carritoMesh = new THREE.Mesh( extrudeGeometry, extrudeMaterial );
 

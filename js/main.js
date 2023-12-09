@@ -135,6 +135,10 @@ const lamp5 = Geometries.createLantern();
 lamp5.position.set(-500, 0, 100);
 scene.add(lamp5);
 
+const lamp6 = Geometries.createLantern();
+lamp6.position.set(-400, 0, -300);
+scene.add(lamp6);
+
 // Light
 const ambienLight=new THREE.AmbientLight(0xFFFFFF);
 scene.add(ambienLight);

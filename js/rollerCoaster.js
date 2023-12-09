@@ -16,12 +16,12 @@ let axis = new THREE.Vector3( );
 let pt, radians, tangent, t;
 
 const loader = new THREE.TextureLoader();
-const trailReflectionTexture = loader.load("./../maps/refmapGreyRoom3.jpg");
 
 function createTrail( whichTrail = true, columnsAmount = 5 ){
     if( !Number.isInteger(columnsAmount) || columnsAmount < 1 ){
         columnsAmount = 5;
     }
+    const trailReflectionTexture = loader.load("./../maps/refmapGreyRoom3.jpg");
 
     trail.clear();
     let trailShape = new THREE.Shape();
@@ -64,7 +64,7 @@ function createTrail( whichTrail = true, columnsAmount = 5 ){
             new THREE.Vector3( -270, 20, -75 ),
             new THREE.Vector3( -225, 20, -50 ),
             new THREE.Vector3( -170, 2, -25 ),
-        ], true, 'chordal')
+        ], true, 'chordal');
     } else {
         trailCurve =  new THREE.CatmullRomCurve3( [
             new THREE.Vector3( 0, 0, 0 ),
@@ -95,7 +95,7 @@ function createTrail( whichTrail = true, columnsAmount = 5 ){
                 color: 0x26a269, 
                 envMap: trailReflectionTexture,
                 reflectivity: 0.9,
-                specular: 0xffffff, 
+                specular: 0x444444, 
                 shininess: 100,
             } )
         );
@@ -120,7 +120,7 @@ function createTrail( whichTrail = true, columnsAmount = 5 ){
         color: 0xe47200,
         envMap: trailReflectionTexture,
         reflectivity: 0.8,
-        specular: 0xffffff, 
+        specular: 0xbbbbbb, 
         shininess: 200,
     });
 
