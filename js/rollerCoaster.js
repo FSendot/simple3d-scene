@@ -5,15 +5,20 @@ import * as Geometries from './basicGeometries.js';
 let trail = new THREE.Group();
 let trailPath;
 const passengerCamera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-passengerCamera.rotateX(Math.PI/2);
-passengerCamera.rotateZ(-Math.PI/2);
+passengerCamera.rotateY(Math.PI);
 
-const carrito = Geometries.createCarritoMesh();
+const carritoMesh = Geometries.createCarritoMesh();
+carritoMesh.rotateX(Math.PI/2);
+carritoMesh.rotateY(Math.PI/2);
+
+const carrito = new THREE.Group().add(carritoMesh);
 carrito.translateY(35);
 passengerCamera.translateY(40);
-let up = new THREE.Vector3( 0, 1, 0 );
-let axis = new THREE.Vector3( );
-let pt, radians, tangent, t;
+let pt, t;
+
+const forward = new THREE.Vector3();
+const right = new THREE.Vector3();
+const up = new THREE.Vector3();
 
 const loader = new THREE.TextureLoader();
 
@@ -24,6 +29,10 @@ function createTrail( whichTrail = true, columnsAmount = 5 ){
     const trailReflectionTexture = loader.load("./../maps/refmapGreyRoom3.jpg");
 
     trail.clear();
+    
+    const trailSteps = 500;
+    const trailSegments = 64;
+
     let trailShape = new THREE.Shape();
     trailShape.moveTo(0,0);
     trailShape.bezierCurveTo(0,0, 0,-1, 0,-2);
@@ -38,13 +47,7 @@ function createTrail( whichTrail = true, columnsAmount = 5 ){
     trailShape.bezierCurveTo(-1,-3, -1, -2, -1,-0.5);
     trailShape.bezierCurveTo(-1,-0.25, -1, 0, -0.5,0);
     trailShape.bezierCurveTo(-0.5,0, -0.2, 0, 0,0);
-    const trailShapePoints = trailShape.extractPoints(50);
-    trailShapePoints.shape.forEach( e => {
-        e.rotateAround( new THREE.Vector2(0,0), Math.PI/2);
-        e.setY(e.y-5);
-        e.setX(e.x-5);
-    });
-    trailShape = new THREE.Shape(trailShapePoints.shape);
+    
     let trailCurve;
 
     if(whichTrail){
@@ -82,6 +85,160 @@ function createTrail( whichTrail = true, columnsAmount = 5 ){
     }
     trailPath = new THREE.CurvePath();
     trailPath.add(trailCurve);
+
+    // Trail creation via Buffer Geometry instead of Extrude Geometry
+    const trailBuffGeometry = new THREE.BufferGeometry();
+    const shapePoints = trailShape.extractPoints(trailSegments);
+
+    const vertices = [];
+    const normals = [];
+    const colors = [];
+
+    const forward = new THREE.Vector3();
+    const right = new THREE.Vector3();
+
+    const quaternion = new THREE.Quaternion();
+    const prevQuaternion = new THREE.Quaternion();
+    prevQuaternion.setFromAxisAngle( up, Math.PI / 2 );
+
+	const point = new THREE.Vector3();
+	const prevPoint = new THREE.Vector3();
+	prevPoint.copy( trailCurve.getPointAt( 0 ) );
+
+	const vector = new THREE.Vector3();
+	const normal = new THREE.Vector3();
+
+
+    const vector1 = new THREE.Vector3();
+    const vector2 = new THREE.Vector3();
+    const vector3 = new THREE.Vector3();
+    const vector4 = new THREE.Vector3();
+
+    const normal1 = new THREE.Vector3();
+    const normal2 = new THREE.Vector3();
+    const normal3 = new THREE.Vector3();
+    const normal4 = new THREE.Vector3();
+
+    const color = [];
+    color.push(1, 1, 1);
+
+    for ( let i = 1; i <= trailSteps; i ++ ) {
+
+        point.copy( trailCurve.getPointAt( i / trailSteps ) );
+
+        up.set( 0, 1, 0 );
+
+        forward.subVectors( point, prevPoint ).normalize();
+        right.crossVectors( up, forward ).normalize();
+        up.crossVectors( forward, right );
+
+        var angle = Math.atan2( forward.x, forward.z );
+
+        quaternion.setFromAxisAngle( up, angle );
+
+        if ( i % 2 === 0 ) {
+
+            normal.set( 0, 0, - 1 ).applyQuaternion( quaternion );
+
+
+            for ( let j = 0; j < shapePoints.length; j ++ ) {
+                vector.copy( shapePoints[ j ] );
+                vector.applyQuaternion( quaternion );
+                vector.add( point );
+
+                vertices.push( vector.x, vector.y, vector.z );
+                normals.push( normal.x, normal.y, normal.z );
+                colors.push( color[0], color[1], color[2] );
+            }
+
+            normal.set( 0, 0, 1 ).applyQuaternion( quaternion );
+
+            for ( let j = shapePoints.length - 1; j >= 0; j -- ) {
+                vector.copy( shapePoints[ j ] );
+                vector.applyQuaternion( quaternion );
+                vector.add( point );
+
+                vertices.push( vector.x, vector.y, vector.z );
+                normals.push( normal.x, normal.y, normal.z );
+                colors.push( color[0], color[1], color[2] );
+            }
+
+        }
+
+        for ( let j = 0, jl = shapePoints.length; j < jl; j ++ ) {
+            let point1 = shapePoints[ j ];
+            let point2 = shapePoints[ ( j + 1 ) % jl ];
+
+            vector1.copy( point1 );
+            vector1.applyQuaternion( quaternion );
+            vector1.add( point );
+
+            vector2.copy( point2 );
+            vector2.applyQuaternion( quaternion );
+            vector2.add( point );
+
+            vector3.copy( point2 );
+            vector3.applyQuaternion( prevQuaternion );
+            vector3.add( prevPoint );
+
+            vector4.copy( point1 );
+            vector4.applyQuaternion( prevQuaternion );
+            vector4.add( prevPoint );
+
+            vertices.push( vector1.x, vector1.y, vector1.z );
+            vertices.push( vector2.x, vector2.y, vector2.z );
+            vertices.push( vector4.x, vector4.y, vector4.z );
+
+            vertices.push( vector2.x, vector2.y, vector2.z );
+            vertices.push( vector3.x, vector3.y, vector3.z );
+            vertices.push( vector4.x, vector4.y, vector4.z );
+
+            //
+
+            normal1.copy( point1 );
+            normal1.applyQuaternion( quaternion );
+            normal1.normalize();
+
+            normal2.copy( point2 );
+            normal2.applyQuaternion( quaternion );
+            normal2.normalize();
+
+            normal3.copy( point2 );
+            normal3.applyQuaternion( prevQuaternion );
+            normal3.normalize();
+
+            normal4.copy( point1 );
+            normal4.applyQuaternion( prevQuaternion );
+            normal4.normalize();
+
+            normals.push( normal1.x, normal1.y, normal1.z );
+            normals.push( normal2.x, normal2.y, normal2.z );
+            normals.push( normal4.x, normal4.y, normal4.z );
+
+            normals.push( normal2.x, normal2.y, normal2.z );
+            normals.push( normal3.x, normal3.y, normal3.z );
+            normals.push( normal4.x, normal4.y, normal4.z );
+
+            colors.push( color[ 0 ], color[ 1 ], color[ 2 ] );
+            colors.push( color[ 0 ], color[ 1 ], color[ 2 ] );
+            colors.push( color[ 0 ], color[ 1 ], color[ 2 ] );
+
+            colors.push( color[ 0 ], color[ 1 ], color[ 2 ] );
+            colors.push( color[ 0 ], color[ 1 ], color[ 2 ] );
+            colors.push( color[ 0 ], color[ 1 ], color[ 2 ] );
+
+        }
+
+        prevPoint.copy( point );
+        prevQuaternion.copy( quaternion );
+
+    }
+
+    trailBuffGeometry.setAttribute( 'position', new THREE.BufferAttribute( new Float32Array( vertices ), 3 ) );
+    trailBuffGeometry.setAttribute( 'normal', new THREE.BufferAttribute( new Float32Array( normals ), 3 ) );
+    // trailBuffGeometry.setAttribute( 'color', new THREE.BufferAttribute( new Float32Array( colors ), 3 ) );
+
+    // End of rollerCoaster with Buffer Geometry
 
     const steps = 1.0/columnsAmount;
     let path = 0.0;
@@ -124,7 +281,7 @@ function createTrail( whichTrail = true, columnsAmount = 5 ){
         shininess: 200,
     });
 
-    trail.add( new THREE.Mesh(trailGeometry, trailMaterial));
+    trail.add( new THREE.Mesh(trailBuffGeometry, trailMaterial));
     
     return {trail: trail, trailPath: trailPath}
 };
@@ -132,30 +289,38 @@ function createTrail( whichTrail = true, columnsAmount = 5 ){
 function animate(){
     // Animate the roller coaster and the specialized camera
     // set the marker position
+
+
+    up.set( 0, 1 ,0 );
+    const step = 0.0007;
+    
+    let previousPt = pt;
     pt = trailPath.getPoint( t );
+    
     if(!pt){
         t = 0;
         pt = trailPath.getPoint( t );
     }
 
+
     // set the marker position
     carrito.position.set( pt.x, pt.y + 35, pt.z );
-    passengerCamera.position.set( pt.x, pt.y + 40, pt.z );
+    passengerCamera.position.set( pt.x, pt.y + 50, pt.z );
+    if(previousPt){
+        forward.subVectors( pt, previousPt ).normalize();
+        right.crossVectors( up, forward ).normalize();
+        up.crossVectors( forward, right );
+    }
 
-    // get the tangent to the curve
-    tangent = trailPath.getTangent( t ).normalize();
 
-    // calculate the axis to rotate around
-    axis.crossVectors( up, tangent ).normalize();
-
-    // calcluate the angle between the up vector and the tangent
-    radians = Math.acos( up.dot( tangent ) );
+    let angle = Math.atan2( forward.x, forward.z );
 
     // set the quaternion
-    carrito.quaternion.setFromAxisAngle( axis, radians );
-    passengerCamera.quaternion.setFromAxisAngle( axis, radians );
+    carrito.quaternion.setFromAxisAngle( up, angle );
+    passengerCamera.quaternion.setFromAxisAngle( up, angle );
+    passengerCamera.rotateY(Math.PI);
 
-    t = (t - 1 > 0.001) ? 0 : t += 0.0007;
+    t = (t - 1 > 0.001) ? 0 : t += step;
 
 }
 
