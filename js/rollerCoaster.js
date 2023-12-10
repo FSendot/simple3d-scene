@@ -30,8 +30,8 @@ function createTrail( whichTrail = true, columnsAmount = 5 ){
 
     trail.clear();
     
-    const trailSteps = 500;
-    const trailSegments = 64;
+    const trailSteps = 100;
+    const trailSegments = 12;
 
     let trailShape = new THREE.Shape();
     trailShape.moveTo(0,0);
@@ -86,13 +86,11 @@ function createTrail( whichTrail = true, columnsAmount = 5 ){
     trailPath = new THREE.CurvePath();
     trailPath.add(trailCurve);
 
-    // Trail creation via Buffer Geometry instead of Extrude Geometry
     const trailBuffGeometry = new THREE.BufferGeometry();
-    const shapePoints = trailShape.extractPoints(trailSegments);
+    const shapePoints = trailShape.extractPoints(trailSegments).shape.map( (point) => new THREE.Vector3(point.x - 5.5, point.y, 0));
 
     const vertices = [];
     const normals = [];
-    const colors = [];
 
     const forward = new THREE.Vector3();
     const right = new THREE.Vector3();
@@ -105,9 +103,6 @@ function createTrail( whichTrail = true, columnsAmount = 5 ){
 	const prevPoint = new THREE.Vector3();
 	prevPoint.copy( trailCurve.getPointAt( 0 ) );
 
-	const vector = new THREE.Vector3();
-	const normal = new THREE.Vector3();
-
 
     const vector1 = new THREE.Vector3();
     const vector2 = new THREE.Vector3();
@@ -119,12 +114,9 @@ function createTrail( whichTrail = true, columnsAmount = 5 ){
     const normal3 = new THREE.Vector3();
     const normal4 = new THREE.Vector3();
 
-    const color = [];
-    color.push(1, 1, 1);
-
     for ( let i = 1; i <= trailSteps; i ++ ) {
 
-        point.copy( trailCurve.getPointAt( i / trailSteps ) );
+        point.copy( trailPath.getPointAt( i / trailSteps ) );
 
         up.set( 0, 1, 0 );
 
@@ -135,35 +127,6 @@ function createTrail( whichTrail = true, columnsAmount = 5 ){
         var angle = Math.atan2( forward.x, forward.z );
 
         quaternion.setFromAxisAngle( up, angle );
-
-        if ( i % 2 === 0 ) {
-
-            normal.set( 0, 0, - 1 ).applyQuaternion( quaternion );
-
-
-            for ( let j = 0; j < shapePoints.length; j ++ ) {
-                vector.copy( shapePoints[ j ] );
-                vector.applyQuaternion( quaternion );
-                vector.add( point );
-
-                vertices.push( vector.x, vector.y, vector.z );
-                normals.push( normal.x, normal.y, normal.z );
-                colors.push( color[0], color[1], color[2] );
-            }
-
-            normal.set( 0, 0, 1 ).applyQuaternion( quaternion );
-
-            for ( let j = shapePoints.length - 1; j >= 0; j -- ) {
-                vector.copy( shapePoints[ j ] );
-                vector.applyQuaternion( quaternion );
-                vector.add( point );
-
-                vertices.push( vector.x, vector.y, vector.z );
-                normals.push( normal.x, normal.y, normal.z );
-                colors.push( color[0], color[1], color[2] );
-            }
-
-        }
 
         for ( let j = 0, jl = shapePoints.length; j < jl; j ++ ) {
             let point1 = shapePoints[ j ];
@@ -193,8 +156,6 @@ function createTrail( whichTrail = true, columnsAmount = 5 ){
             vertices.push( vector3.x, vector3.y, vector3.z );
             vertices.push( vector4.x, vector4.y, vector4.z );
 
-            //
-
             normal1.copy( point1 );
             normal1.applyQuaternion( quaternion );
             normal1.normalize();
@@ -218,15 +179,6 @@ function createTrail( whichTrail = true, columnsAmount = 5 ){
             normals.push( normal2.x, normal2.y, normal2.z );
             normals.push( normal3.x, normal3.y, normal3.z );
             normals.push( normal4.x, normal4.y, normal4.z );
-
-            colors.push( color[ 0 ], color[ 1 ], color[ 2 ] );
-            colors.push( color[ 0 ], color[ 1 ], color[ 2 ] );
-            colors.push( color[ 0 ], color[ 1 ], color[ 2 ] );
-
-            colors.push( color[ 0 ], color[ 1 ], color[ 2 ] );
-            colors.push( color[ 0 ], color[ 1 ], color[ 2 ] );
-            colors.push( color[ 0 ], color[ 1 ], color[ 2 ] );
-
         }
 
         prevPoint.copy( point );
@@ -236,9 +188,8 @@ function createTrail( whichTrail = true, columnsAmount = 5 ){
 
     trailBuffGeometry.setAttribute( 'position', new THREE.BufferAttribute( new Float32Array( vertices ), 3 ) );
     trailBuffGeometry.setAttribute( 'normal', new THREE.BufferAttribute( new Float32Array( normals ), 3 ) );
-    // trailBuffGeometry.setAttribute( 'color', new THREE.BufferAttribute( new Float32Array( colors ), 3 ) );
+    trailBuffGeometry.translate(0, 35, 0);
 
-    // End of rollerCoaster with Buffer Geometry
 
     const steps = 1.0/columnsAmount;
     let path = 0.0;
@@ -262,16 +213,6 @@ function createTrail( whichTrail = true, columnsAmount = 5 ){
         trail.add(column);
         path = path + steps;
     }
-    const trailExtrudeSettings = {
-        curveSegments: 50,
-        steps: 1000,
-        bevelEnabled: false,
-        extrudePath: trailPath,
-    };
-    const trailGeometry = new THREE.ExtrudeGeometry(trailShape, trailExtrudeSettings);
-
-    // trailGeometry.rotateZ(Math.PI/2);
-    trailGeometry.translate(0,30,0);
 
     const trailMaterial = new THREE.MeshPhongMaterial({ 
         color: 0xe47200,
