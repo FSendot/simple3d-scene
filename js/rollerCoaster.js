@@ -30,7 +30,7 @@ function createTrail( whichTrail = true, columnsAmount = 5 ){
 
     trail.clear();
     
-    const trailSteps = 100;
+    const trailSteps = 200;
     const trailSegments = 12;
 
     let trailShape = new THREE.Shape();
