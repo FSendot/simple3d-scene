@@ -80,7 +80,7 @@ const tierraSeca = loader.load("./../maps/tierraseca.jpg", (tierraSeca) => {
     renderer.copyTextureToTexture(new THREE.Vector2(0, 0.5), tierraSeca, pasto, 1);
 });
 
-const floorMaterial = new THREE.MeshPhongMaterial({ 
+const floorMaterial = new THREE.MeshLambertMaterial({ 
     map: pasto,
     emissive: 0x111111,
     reflectivity: 0,
@@ -98,7 +98,7 @@ const skyTexture = loader.load("./../maps/sunset.jpg", (skyTexture) => {
     skyTexture.anisotropy = 256;
     skyTexture.repeat.set(1, 1);
 });
-const skyMaterial = new THREE.MeshPhongMaterial({ 
+const skyMaterial = new THREE.MeshLambertMaterial({ 
     map: skyTexture,
     emissive: 0x222222,
     reflectivity: 0,
