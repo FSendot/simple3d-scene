@@ -83,9 +83,6 @@ const tierraSeca = loader.load("./../maps/tierraseca.jpg", (tierraSeca) => {
 const floorMaterial = new THREE.MeshLambertMaterial({ 
     map: pasto,
     emissive: 0x111111,
-    reflectivity: 0,
-    specular: 0, 
-    shininess: 30,
 });
 const floor = new THREE.Mesh( 
     new THREE.PlaneGeometry(10000, 10000), 
@@ -100,10 +97,7 @@ const skyTexture = loader.load("./../maps/sunset.jpg", (skyTexture) => {
 });
 const skyMaterial = new THREE.MeshLambertMaterial({ 
     map: skyTexture,
-    emissive: 0x222222,
-    reflectivity: 0,
-    specular: 0, 
-    shininess: 100000,
+    emissive: 0x555555,
 });
 const sky = new THREE.Mesh(
     new THREE.SphereGeometry(5000, 64, 32, 0, Math.PI * 2, 1.7, Math.PI * 1.55),
