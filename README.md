@@ -1,7 +1,7 @@
 # simple3d-scene
 # Building del Proyecto
 
-Es necesario tener NodeJS y npm instalado en el equipo de prueba, no porque sea neceario descargar paquetes, pero será necesario para poder ejecutar el entorno de Vite con NodeJS. Sin NodeJS eso no sería posible.
+Es necesario tener NodeJS y npm instalado en el equipo de prueba, no porque sea necesario descargar paquetes, pero será necesario para poder ejecutar el entorno de Vite con NodeJS. Sin NodeJS eso no sería posible.
 
 Con seguir los pasos para descritos en el siguiente link: https://threejs.org/docs/index.html#manual/en/introduction/Installation debería ser suficiente.
 
